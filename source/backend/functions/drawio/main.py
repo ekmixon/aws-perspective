@@ -41,8 +41,7 @@ class Node:
             children_points = list(
                 filter(None, map(lambda c: (c.height*0.5 + c.center_y), self.children)))
             furthest_point = max(children_points)
-            result = furthest_point + drawing_margin - self.y
-            return result
+            return furthest_point + drawing_margin - self.y
 
     @property
     def width(self):
@@ -54,8 +53,7 @@ class Node:
             children_points = list(
                 filter(None, map(lambda c: (c.width*0.5 + c.center_x), self.children)))
             furthest_point = max(children_points)
-            result = 2*(furthest_point + drawing_margin - self.center_x)
-            return result
+            return 2*(furthest_point + drawing_margin - self.center_x)
 
     @property
     def x(self):
@@ -67,8 +65,7 @@ class Node:
             children_points = list(
                 filter(None, map(lambda c: (c.center_x - 0.5*c.width), self.children)))
             min_point = min(children_points)
-            result = (min_point - drawing_margin)
-            return result
+            return (min_point - drawing_margin)
 
     @property
     def y(self):
@@ -80,8 +77,7 @@ class Node:
             children_points = list(
                 filter(None, map(lambda c: (c.center_y - 0.5*c.height), self.children)))
             min_point = min(children_points)
-            result = (min_point - drawing_margin)
-            return result
+            return (min_point - drawing_margin)
 
     def add_child(self, child):
         self.children.append(child)
@@ -140,7 +136,7 @@ def handler(event, context):
     """
     Main Lambda Handler
     """
-    node_dict = dict()
+    node_dict = {}
 
     data = json.loads(event['body'])['data']
     nodes = data.get('nodes', [])
@@ -183,7 +179,8 @@ def handler(event, context):
     # Convert XML encoded string to URL encoded string
     xml_output_url = urllib.parse.quote(xml_output_compressed_encoded, safe='')
     # Attach XML string to Draw IO URL (Note: Draw IO is not app.diagram.net due to .io vulnerabilities)
-    drawio_url = 'https://app.diagrams.net?title=AWS%20Architecture%20Diagram.xml#R' + xml_output_url
+    drawio_url = f'https://app.diagrams.net?title=AWS%20Architecture%20Diagram.xml#R{xml_output_url}'
+
 
     return {
         'headers': {
@@ -217,8 +214,7 @@ def produce_xml_output(elements):
         xml_object = elem.get_xml_object()
         root.append(xml_object)
 
-    xml_output = tostring(xml_model)
-    return xml_output
+    return tostring(xml_model)
 
 
 def deflate_and_base64_encode(string_val):

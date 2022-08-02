@@ -122,7 +122,7 @@ def load_schema(schema_name, schema_dir=None):
         caller_dir = os.path.dirname(os.path.abspath((inspect.stack()[1])[1]))
         schema_dir = os.path.join(caller_dir, "schemas")
 
-    with open(os.path.join(schema_dir, "{}.json".format(schema_name))) as f:
+    with open(os.path.join(schema_dir, f"{schema_name}.json")) as f:
         return json.load(f)
 
 
@@ -211,7 +211,10 @@ def sanitize_args(args):
     disallowed_keys = ["match"]
     if isinstance(args, dict):
         for k, v in args.items():
-            if isinstance(k, str) and any([disallowed.lower() in k.lower() for disallowed in disallowed_keys]):
+            if isinstance(k, str) and any(
+                disallowed.lower() in k.lower()
+                for disallowed in disallowed_keys
+            ):
                 if isinstance(v, (list, tuple)):
                     args[k] = ['*** MATCH ID ***' for _ in v]
                 else:

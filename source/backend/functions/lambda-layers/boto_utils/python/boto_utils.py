@@ -32,8 +32,7 @@ def paginate(client, method, iter_keys, **kwargs):
     for page in page_iterator:
         for key in iter_keys:
             page = page[key]
-        for result in page:
-            yield result
+        yield from page
 
 
 def read_queue(queue, number_to_read=10):
@@ -47,7 +46,7 @@ def read_queue(queue, number_to_read=10):
             break  # no messages left
         remaining = number_to_read - len(msgs)
         i = min(remaining, len(received))  # take as many as allowed from the received messages
-        msgs = msgs + received[:i]
+        msgs += received[:i]
     return msgs
 
 
@@ -72,15 +71,15 @@ def emit_event(job_id, event_name, event_data, emitter_id=None, created_at=None)
         created_at = datetime.now(timezone.utc).timestamp()
     item = {
         "Id": job_id,
-        "Sk": "{}#{}".format(round(created_at * 1000), str(uuid.uuid4())),
+        "Sk": f"{round(created_at * 1000)}#{str(uuid.uuid4())}",
         "Type": "JobEvent",
         "EventName": event_name,
         "EventData": normalise_dates(event_data),
         "EmitterId": emitter_id,
         "CreatedAt": normalise_dates(round(created_at)),
     }
-    expiry = get_job_expiry(job_id)
-    if expiry:
+
+    if expiry := get_job_expiry(job_id):
         item["Expires"] = expiry
     table.put_item(Item=item)
 
@@ -92,7 +91,7 @@ def get_job_expiry(job_id):
 
 def running_job_exists():
     jobs = []
-    for gsi_bucket in range(0, bucket_count):
+    for gsi_bucket in range(bucket_count):
         response = table.query(
             IndexName=index,
             KeyConditionExpression=Key('GSIBucket').eq(str(gsi_bucket)),
@@ -144,8 +143,7 @@ def convert_iso8601_to_epoch(iso_time: str):
     with_ms = "." in normalised
     regex = "%Y-%m-%dT%H:%M:%S.%f%z" if with_ms else "%Y-%m-%dT%H:%M:%S%z"
     parsed = datetime.strptime(normalised, regex)
-    unix_timestamp = round(parsed.timestamp())
-    return unix_timestamp
+    return round(parsed.timestamp())
 
 
 def normalise_dates(data):

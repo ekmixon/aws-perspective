@@ -42,7 +42,7 @@ def create(event, context):
     props = event.get('ResourceProperties', None)
     lambda_role_arn = props.get("RoleArn")
     resource_prefix = props.get("ResourcePrefix")
-    lambda_function_name = "{}-{}".format(resource_prefix, uuid.uuid4())
+    lambda_function_name = f"{resource_prefix}-{uuid.uuid4()}"
     with open(lambda_code_path, 'rb') as zf:
         response = client.create_function(
             FunctionName=lambda_function_name,
@@ -56,7 +56,7 @@ def create(event, context):
         )
 
         function_arn = response['FunctionArn']
-        with_version = "{}:{}".format(function_arn, response['Version'])
+        with_version = f"{function_arn}:{response['Version']}"
         helper.Data.update({"FunctionArnWithVersion": with_version})
 
         return function_arn

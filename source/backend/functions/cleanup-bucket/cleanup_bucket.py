@@ -43,7 +43,7 @@ def create(event, context):
 @helper.delete
 def delete(event, _):
     bucket_name = event['ResourceProperties']['Bucket']
-    logger.info('Beginning cleanup of ' + bucket_name + '...')
+    logger.info(f'Beginning cleanup of {bucket_name}...')
     bucket = s3.Bucket(bucket_name)
     # We need to disable access logging or the access log bucket will never empty.
     # Attempting to resolve this with DependsOn attributes results in numerous
@@ -51,7 +51,7 @@ def delete(event, _):
     client.put_bucket_logging(Bucket=bucket_name, BucketLoggingStatus={})
     bucket.objects.all().delete()
     bucket.object_versions.all().delete()
-    logger.info('Cleanup of ' + bucket_name + ' complete.')
+    logger.info(f'Cleanup of {bucket_name} complete.')
     return None
 
 

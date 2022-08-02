@@ -6,15 +6,15 @@ from base64 import b64encode
 
 
 def get_type_definitions():
-    
+
     # URL where perspective icon set is hosted
     perspective_icon_url = 'https://perspective-icon-svg-set.s3-eu-west-1.amazonaws.com/perspective-icons.zip'
     perspective_zip = 'perspective-icons.zip'
-    
+
     # Build a dictionary that provides a default AWS Resource Icon if type does not exist in definitions
     default_icon = 'gradientDirection=north;outlineConnect=0;fontColor=#232F3E;gradientColor=#505863;fillColor=#1E262E;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;fontFamily=Tahoma;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.general;'
     default_icon_size = 43
-    
+
     # Styles pulled from draw.io (that are not )
     type_definitions = {
         'account': {
@@ -39,14 +39,14 @@ def get_type_definitions():
             'style' : 'points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=11;fontStyle=0;fontFamily=Tahoma;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc;strokeColor=#248814;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#AAB7B8;dashed=0;'
         }
     }
-    
+
     # If icons don't exist in /tmp, then download them to tmp
-    if not os.path.isfile('/tmp/' + perspective_zip):
+    if not os.path.isfile(f'/tmp/{perspective_zip}'):
         with urllib.request.urlopen(perspective_icon_url) as dl_file:
-            with open('/tmp/' + perspective_zip, 'wb') as out_file:
+            with open(f'/tmp/{perspective_zip}', 'wb') as out_file:
                 out_file.write(dl_file.read())
-    
-    zipped_icons = zipfile.ZipFile('/tmp/' + perspective_zip)
+
+    zipped_icons = zipfile.ZipFile(f'/tmp/{perspective_zip}')
     for i in range(len(zipped_icons.namelist())):
         icon_filename = zipped_icons.namelist()[i]
         if (".svg" in icon_filename):
@@ -54,10 +54,16 @@ def get_type_definitions():
             if icon_name not in type_definitions:
                 svg = zipped_icons.read(icon_filename)
                 encoded_svg = b64encode(svg).decode()
-                style = 'shape=image;verticalLabelPosition=bottom;verticalAlign=top;fontSize=11;fontFamily=Tahoma;aspect=fixed;imageAspect=0;image=data:image/svg+xml,' + encoded_svg
+                style = f'shape=image;verticalLabelPosition=bottom;verticalAlign=top;fontSize=11;fontFamily=Tahoma;aspect=fixed;imageAspect=0;image=data:image/svg+xml,{encoded_svg}'
+
                 type_definitions[icon_name] = {'style' : style, 'width': default_icon_size, 'height': default_icon_size}
 
-            
-    types = defaultdict(lambda: {'style': default_icon, 'height': default_icon_size, 'width': default_icon_size}, type_definitions)
-    
-    return types
+
+    return defaultdict(
+        lambda: {
+            'style': default_icon,
+            'height': default_icon_size,
+            'width': default_icon_size,
+        },
+        type_definitions,
+    )
